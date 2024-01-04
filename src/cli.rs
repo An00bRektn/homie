@@ -17,6 +17,7 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Adds a new host to the config file
     Add {
         /// (String) New IP address to add
         #[arg(short, long)]
@@ -34,15 +35,18 @@ pub enum Commands {
         #[arg(short, long)]
         domain: Option<String>
     },
+    /// Deletes a host from the config file
     Delete {
         #[arg(short, long)]
         ip: String,
     },
+    /// Gets information on the hosts stored in the config file (can specify a host by IP)
     Info {
         /// (String) access info on machine by IP
         #[arg(short, long)]
         ip: Option<String>
     },
+    /// Initializes a new workspace
     Init {
         /// (String) specify location for new homie workspace
         #[arg(short, long, value_name = "FILE")]

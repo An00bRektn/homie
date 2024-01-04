@@ -11,6 +11,8 @@
 - 📁 **Sets up folders** so you can get right to hacking instead of organizing
 - 🔥 **Written in Rust** because why not
 
+**Contributions welcome!** This is my first Rust project that I've actually gone through with and I know I could be writing much more elegant code. If this is helpful and there are changes you want to see, drop a PR! :)
+
 ## Usage
 ```
 PS > homie.exe -h
@@ -19,9 +21,11 @@ a homie that's really into organization
 Usage: homie.exe [OPTIONS] [COMMAND]
 
 Commands:
-  add
-  info
-  help  Print this message or the help of the given subcommand(s)
+  add     Adds a new host to the config file
+  delete  Deletes a host from the config file
+  info    Gets information on the hosts stored in the config file (can specify a host by IP)
+  init    Initializes a new workspace
+  help    Print this message or the help of the given subcommand(s)
 
 Options:
   -c, --config <FILE>  Specifies path to config file (default searches parent directories for .homie.yml)
@@ -44,7 +48,6 @@ The executable will be located at `target/release/homie`.
 
 ## TODO
 - [ ] Add the ability to update a field for an existing host
-- [ ] Add the ability to delete hosts from `.homie.yml`
 - [ ] Implement a local store (sqlite) for credentials
     - [ ] Ability to add user, password, and note
     - [ ] Ability to update password keyed by username

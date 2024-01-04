@@ -184,7 +184,6 @@ fn init_homie(target_directory: Option<PathBuf>) {
 
 fn main() {
     let args = Args::parse();
-    
     let true_config_path = check_config(args.config); // validate .homie.yml location
     let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
     let mut hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
