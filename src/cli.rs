@@ -34,6 +34,10 @@ pub enum Commands {
         #[arg(short, long)]
         domain: Option<String>
     },
+    Delete {
+        #[arg(short, long)]
+        ip: String,
+    },
     Info {
         /// (String) access info on machine by IP
         #[arg(short, long)]

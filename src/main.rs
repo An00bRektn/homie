@@ -21,6 +21,13 @@ fn host_to_mapping(new_host: &Host) -> Mapping {
     new_mapping
 }
 
+fn check_ip_to_host(input_file: &HostsFile, ip_address: &String) -> bool {
+    match input_file.hosts.get(ip_address) {
+        Some(_) => true,
+        None => false,
+    }
+}
+
 fn check_config(config_path: Option<PathBuf>) -> String {
     match config_path.as_deref() {
         Some(conf) => {
@@ -70,6 +77,21 @@ fn find_config_file() -> Option<PathBuf>{
     }
 }
 
+fn yes_no_prompt(prompt: &str) -> bool {
+    println!("{}", prompt);
+    let mut user_choice = String::new();
+
+    io::stdin()
+        .read_line(&mut user_choice)
+        .expect("[!] Failed to read user input");
+
+    if user_choice.chars().nth(0).unwrap() == 'y' {
+        true
+    } else {
+        false
+    }
+}
+
 fn create_new_wkspace(ip_address: &String, path_str: &String) {
     let mut path = PathBuf::from_str(path_str).unwrap();
     path.pop();
@@ -78,33 +100,42 @@ fn create_new_wkspace(ip_address: &String, path_str: &String) {
     path.push(new_dir);
 
     if !path.is_dir() {
-        println!("[*] Did you want to create a new directory for this host? (y/n)");
-        let mut user_choice = String::new();
-
-        io::stdin()
-            .read_line(&mut user_choice)
-            .expect("[!] Failed to read user input");
-
-        if user_choice.chars().nth(0).unwrap() == 'y' {
+        if yes_no_prompt("[*] Did you want to create a new directory for this host? (y/n)") {
             println!("[*] Making workspace...");
             // TODO error handling
-            // TODO figure out how to make this a loop because I don't want to fight the borrow checker right now
-            //let subdirs = vec!["www", "loot", "scans"];
             fs::create_dir(&path).unwrap();
-            path.push("www");
-            fs::create_dir(&path).unwrap();
-            path.pop(); path.push("loot");
-            fs::create_dir(&path).unwrap();
-            path.pop(); path.push("scans");
-            fs::create_dir(&path).unwrap();
-            path.pop();
+            let subdirs = vec!["www", "loot", "scans"];
+            for dir in subdirs {
+                //println!("[DEBUG]: making {:?}", Path::join(&path, dir));
+                fs::create_dir(Path::join(&path, dir).clone()).unwrap();
+            }
             println!("[+] Created! Located at {:?}", path.as_os_str().to_str().unwrap());
         } else {
             println!("[+] Skipping...")
         }
 
-    }
+    }   
+}
+
+fn delete_new_wkspace(ip_address: &String, path_str: &String) {
+    let mut path = PathBuf::from_str(path_str).unwrap();
+    path.pop();
     
+    let new_dir = Path::new(ip_address);
+    path.push(new_dir);
+
+    if path.is_dir() {
+        if yes_no_prompt(&format!("[*] Did you want to delete the directory for {}? (y/n)", ip_address)) {
+            println!("[*] Deleting workspace...");
+            // TODO error handling
+            // println!("[DEBUG] Path to delete: {:?}", path);
+            fs::remove_dir_all(path).unwrap();
+            println!("[+] Done!");
+        } else {
+            println!("[+] Skipping...")
+        }
+
+    }       
 }
 
 fn value_to_host(host_mapping: serde_yaml::Value) -> Result<Host, serde_yaml::Error> {
@@ -118,8 +149,9 @@ fn main() {
     let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
     let mut hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
     
-    // TODO: Update and Delete commands
+    // TODO: Update commands
     // TODO: Credential commands
+    // TODO: Validate contents of hosts file
 
     // Actually executing stuff
     match &args.command {
@@ -141,6 +173,32 @@ fn main() {
 
             // ask if we want to create a new directory and do that
             create_new_wkspace(ip, &true_config_path)
+        },
+        // COMMAND: Delete
+        // delete host by ip
+        Some(Commands::Delete { ip }) => {
+            // check if ip was actually there
+            if check_ip_to_host(&hosts_file, ip) {
+                // ask if you're sure you want to delete
+                if yes_no_prompt(&format!("[?] Are you sure you want to delete the entry for {}? (y/n)", ip)) {
+                    // delete the entry
+                    hosts_file.hosts.remove_entry(ip.clone());
+                    // TODO: function-ify this file write, not immediately sure if it's a good idea and too lazy to think about it
+                    let back_to_yaml = serde_yaml::to_string(&hosts_file).unwrap(); // convert new mapping to yaml
+                    // write to file
+                    let mut fd = std::fs::OpenOptions::new().write(true).truncate(true).open(true_config_path.clone()).unwrap();
+                    let _ = fd.write_all(back_to_yaml.as_bytes());
+                    let _ = fd.flush();
+
+                    delete_new_wkspace(ip, &true_config_path);
+                } else {
+                    println!("[*] Exiting...")
+                }
+            } else {
+                println!("[!] Error: IP Address {} not found in {}", ip, true_config_path);
+            }
+
+
         },
         // COMMAND: INFO
         // print info about a specific ip, if no ip is supplied, print information about all hosts
