@@ -24,7 +24,7 @@ Commands:
   help  Print this message or the help of the given subcommand(s)
 
 Options:
-  -c, --config <FILE>  Specifies path to config file (default searches parent directories for .homie.yaml)
+  -c, --config <FILE>  Specifies path to config file (default searches parent directories for .homie.yml)
   -h, --help           Print help
   -V, --version        Print version
 ```
@@ -44,7 +44,7 @@ The executable will be located at `target/release/homie`.
 
 ## TODO
 - [ ] Add the ability to update a field for an existing host
-- [ ] Add the ability to delete hosts from `.homie.yaml`
+- [ ] Add the ability to delete hosts from `.homie.yml`
 - [ ] Implement a local store (sqlite) for credentials
     - [ ] Ability to add user, password, and note
     - [ ] Ability to update password keyed by username

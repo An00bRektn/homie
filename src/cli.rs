@@ -6,7 +6,7 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(author="An00bRektn", version="0.1.0", about="a homie that's really into organization", long_about = None)]
 pub struct Args {
-    /// Specifies path to config file (default searches parent directories for .homie.yaml)
+    /// Specifies path to config file (default searches parent directories for .homie.yml)
     #[arg(short, long, value_name = "FILE")]
     pub config: Option<PathBuf>,
 
@@ -42,6 +42,11 @@ pub enum Commands {
         /// (String) access info on machine by IP
         #[arg(short, long)]
         ip: Option<String>
+    },
+    Init {
+        /// (String) specify location for new homie workspace
+        #[arg(short, long, value_name = "FILE")]
+        directory: Option<PathBuf>
     },
     // Update {
     //     #[arg(short, long)]
