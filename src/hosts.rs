@@ -12,7 +12,7 @@ pub struct Host {
 
 impl Host {
     /// Instantiate a new host struct
-    pub fn new(hostname: Option<String>, os: Option<String>, access: Option<bool> , domain: Option<String>) -> Host{
+    pub fn new(hostname: Option<String>, os: Option<String>, access: Option<bool> , domain: Option<String>) -> Host {
         Host{
             hostname: hostname.unwrap_or(String::from("")),
             os: os.unwrap_or(String::from("")),
@@ -21,6 +21,7 @@ impl Host {
         }
     }
 }
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HostsFile {

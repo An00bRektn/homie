@@ -52,11 +52,20 @@ pub enum Commands {
         #[arg(short, long, value_name = "FILE")]
         directory: Option<PathBuf>
     },
-    // Update {
-    //     #[arg(short, long)]
-    //     ip: String,
-
-    //     #[arg(short, long)]
-    //     value: String,
-    // },    
+    Update {
+         #[arg(short, long)]
+         ip: String,
+        /// (optional, String) hostname of host
+        #[arg(short='n', long)]
+        hostname: Option<String>,
+        /// (optional, String) operating system, should be enum
+        #[arg(short, long)]
+        os: Option<String>,
+        /// (optional, bool) if machine can be accessed
+        #[arg(short, long)]
+        access: Option<bool>,
+        /// (optional, String) domain to which machine is joined
+        #[arg(short, long)]
+        domain: Option<String>
+    },    
 }

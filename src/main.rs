@@ -146,6 +146,7 @@ fn value_to_host(host_mapping: serde_yaml::Value) -> Result<Host, serde_yaml::Er
     serde_yaml::from_value(host_mapping)
 }
 
+// TODO: If this is called with an existing .homie.yml, create the directories from the yaml structure
 fn init_homie(target_directory: Option<PathBuf>) {
     match target_directory.as_deref() {
         Some(conf) => {
@@ -249,7 +250,34 @@ fn main() {
                 println!("[!] Error: IP Address {} not found in {}", ip, true_config_path);
             }
 
-
+        },
+        // COMMAND: UPDATE
+        // Update a host's info
+        Some(Commands::Update { ip, hostname, os, access, domain }) => {
+            match hosts_file.hosts.get(ip) {
+                Some(host) => {
+                    // TODO: This looks awful, look into implementing this with a trait?
+                    //       ex: https://users.rust-lang.org/t/style-question-update-variable-based-on-an-option-value/40481
+                    let mut old_host = value_to_host(host.clone()).unwrap();
+                    old_host.hostname = hostname.clone().map_or_else(|| old_host.hostname, |x| x);
+                    old_host.os = os.clone().map_or_else(|| old_host.os, |x| x);
+                    old_host.access = access.clone().map_or_else(|| old_host.access, |x| x);
+                    if domain.is_some() {
+                        old_host.domain = domain.clone();
+                    }
+                    println!("[*] Updating...");
+                    // TODO: Rewrite this to reuse the add code
+                    hosts_file.hosts.insert(ip.clone().into(), host_to_mapping(&old_host).into());
+                    let back_to_yaml = serde_yaml::to_string(&hosts_file).unwrap(); // convert new mapping to yaml
+                    // write to file
+                    let mut fd = std::fs::OpenOptions::new().write(true).truncate(true).open(true_config_path.clone()).unwrap();
+                    let _ = fd.write_all(back_to_yaml.as_bytes());
+                    let _ = fd.flush();
+                    println!("[+] Updated! New info for {}:\n{:#?}", ip, old_host)
+                },
+                None => println!("[!] Error: IP Address {} not found in {}", ip, true_config_path),
+            }
+            
         },
         // COMMAND: INFO
         // print info about a specific ip, if no ip is supplied, print information about all hosts
