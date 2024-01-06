@@ -66,6 +66,7 @@ Rude.
     - [ ] Ability to update password keyed by username
     - [ ] Ability to delete based on username
 - [ ] Pretty print with colors like jq
+- [ ] Verbosity flag?
 - [ ] Refactoring
   - [ ] More error handling and checking
   - [ ] Make code cleaner (I'm not good at Rust)
