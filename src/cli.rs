@@ -52,9 +52,10 @@ pub enum Commands {
         #[arg(short, long, value_name = "FILE")]
         directory: Option<PathBuf>
     },
+    /// Updates an existing entry in .homie.yml
     Update {
-         #[arg(short, long)]
-         ip: String,
+        #[arg(short, long)]
+        ip: String,
         /// (optional, String) hostname of host
         #[arg(short='n', long)]
         hostname: Option<String>,

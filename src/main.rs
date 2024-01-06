@@ -104,7 +104,7 @@ fn create_new_wkspace(ip_address: &String, path_str: &String) {
     path.push(new_dir);
 
     if !path.is_dir() {
-        if yes_no_prompt("[?] Did you want to create a new directory for this host? (y/n) ") {
+        if yes_no_prompt(&format!("[?] Did you want to create a new directory for this host [{}]? (y/n) ", ip_address)) {
             println!("[*] Making workspace...");
             // TODO error handling
             fs::create_dir(&path).unwrap();
@@ -146,7 +146,6 @@ fn value_to_host(host_mapping: serde_yaml::Value) -> Result<Host, serde_yaml::Er
     serde_yaml::from_value(host_mapping)
 }
 
-// TODO: If this is called with an existing .homie.yml, create the directories from the yaml structure
 fn init_homie(target_directory: Option<PathBuf>) {
     match target_directory.as_deref() {
         Some(conf) => {
@@ -159,6 +158,21 @@ fn init_homie(target_directory: Option<PathBuf>) {
                         let _ = fd.write_all("hosts:".as_bytes());
                         let _ = fd.flush();
                     } else if path_check.is_file() {
+                        // TODO validate the structure of the YAML file, might need to change typing
+                        //      from generic Mapping
+                        let config_file_str = fs::read_to_string(path_check).expect("Unable to open file");
+                        let config_file = serde_yaml::from_str::<HostsFile>(&config_file_str);
+                        println!("[+] Found and loaded config at {:?}, initializing workspace", path_check);
+                        match config_file {
+                            Ok(hosts_file) => {
+                                for ip in hosts_file.hosts.keys() {
+                                    // TODO: This is really bad, probably need to reevaluate typing on create_new_wkspace()?
+                                    create_new_wkspace(&String::from(ip.clone().as_str().unwrap()), &String::from(path_check.to_str().unwrap()));
+                                }
+                            },
+                            Err(_) => panic!("[!] Bad config file at: {:?}", path_check),
+                        }                  
+                    } else {
                         panic!("[!] Not a suitable location at: {:?}", path_check)
                     }
                 },
@@ -189,7 +203,6 @@ fn main() {
     let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
     let mut hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
     // println!("[+] Config Path: {}", true_config_path); // TODO: Add verbosity flag to print this out
-    // TODO: Update commands
     // TODO: Credential commands
     // TODO: Validate contents of hosts file
 
