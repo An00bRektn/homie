@@ -67,7 +67,7 @@ Rude.
     - [ ] Ability to delete based on username
 - [ ] Pretty print with colors like jq
 - [ ] Verbosity flag?
-- [ ] Refactoring
+- [ ] Refactoring!
   - [ ] More error handling and checking
   - [ ] Make code cleaner (I'm not good at Rust)
   - [ ] Redesign for arbitrary configuration to allow this to be used for more than just security assessments (would really only need a single config)
