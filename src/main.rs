@@ -54,7 +54,7 @@ fn check_config(config_path: Option<PathBuf>) -> String {
                     String::from(path.as_os_str().to_str().unwrap())
                 },
                 None => {
-                    todo!("Ask to create a config file and do that")
+                    panic!("[!] No config file was found. Try running `homie init -d DIRECTORY` to create a new workspace.");
                 },
             }
         }
@@ -197,11 +197,19 @@ fn init_homie(target_directory: Option<PathBuf>) {
     }      
 }
 
+fn get_config(arg_path: Option<PathBuf>) -> (String, HostsFile) {
+    let true_config_path = check_config(arg_path); // validate .homie.yml location
+    let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
+    let hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
+    (true_config_path, hosts_file)    
+}
+
 fn main() {
     let args = Args::parse();
-    let true_config_path = check_config(args.config); // validate .homie.yml location
-    let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
-    let mut hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
+
+    //let true_config_path = check_config(args.config); // validate .homie.yml location
+    //let config_file_str = fs::read_to_string(true_config_path.clone()).expect("Unable to open file");
+    //let mut hosts_file: HostsFile = serde_yaml::from_str::<HostsFile>(&config_file_str).unwrap(); // do the serializing stuff
     // println!("[+] Config Path: {}", true_config_path); // TODO: Add verbosity flag to print this out
     // TODO: Credential commands
     // TODO: Validate contents of hosts file
@@ -211,6 +219,9 @@ fn main() {
         // COMMAND: ADD
         // add a new host to yaml file
         Some(Commands::Add { ip, hostname, os, access, domain }) => {
+            let config_info = get_config(args.config);
+            let true_config_path = config_info.0;
+            let mut hosts_file = config_info.1;
             // TODO: Check if IP address is a duplicate, if so, throw an error
             // TODO: Validate if IP address is real?
             println!("[+] Adding IP Address: {}", ip); 
@@ -242,6 +253,10 @@ fn main() {
         // COMMAND: DELETE
         // delete host by ip
         Some(Commands::Delete { ip }) => {
+            let config_info = get_config(args.config);
+            let true_config_path = config_info.0;
+            let mut hosts_file = config_info.1;
+
             // check if ip was actually there
             if check_ip_to_host(&hosts_file, ip) {
                 // ask if you're sure you want to delete
@@ -267,6 +282,10 @@ fn main() {
         // COMMAND: UPDATE
         // Update a host's info
         Some(Commands::Update { ip, hostname, os, access, domain }) => {
+            let config_info = get_config(args.config);
+            let true_config_path = config_info.0;
+            let mut hosts_file = config_info.1;
+
             match hosts_file.hosts.get(ip) {
                 Some(host) => {
                     // TODO: This looks awful, look into implementing this with a trait?
@@ -295,6 +314,10 @@ fn main() {
         // COMMAND: INFO
         // print info about a specific ip, if no ip is supplied, print information about all hosts
         Some(Commands::Info { ip }) => {
+            let config_info = get_config(args.config);
+            //let true_config_path = config_info.0;
+            let hosts_file = config_info.1;
+
             // was an ip supplied?
             match ip.clone() {
                 // if so, let's only use that

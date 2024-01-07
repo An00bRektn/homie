@@ -13,6 +13,19 @@
 
 **Contributions welcome!** This is my first Rust project that I've actually gone through with and I know I could be writing much more elegant code. If this is helpful and there are changes you want to see, drop a PR! :)
 
+## Install
+### Precompiled Binaries
+Precompiled binaries (Windows/Linux/macOS) are available at [releases](https://github.com/nicocha30/An00bRektn/homie/releases).
+
+### Compile From Source
+Prereqs: [Rust](https://rustup.rs/)
+```
+git clone https://github.com/An00bRektn/homie.git
+cd homie
+cargo build --release
+```
+The executable will be located at `target/release/homie`.
+
 ## Usage
 ```
 PS > homie.exe -h
@@ -34,18 +47,52 @@ Options:
   -V, --version        Print version
 ```
 
-## Install
-### Precompiled Binaries
-Precompiled binaries (Windows/Linux/macOS) are available at [releases](https://github.com/nicocha30/An00bRektn/homie/releases).
+### Examples
+#### Initialize Workspace
+```
+PS > homie init
+[*] Current Directory: "C:\\Users\\homie\\examplecorp.local"
+[?] Would you like to initialize a homie workspace in the current directory? (y/n) y
+[+] New workspace created at "C:\\Users\\homie\\examplecorp.local"
+PS > cat .\.homie.yml
+hosts:
+```
 
-### Compile From Source
-Prereqs: [Rust](https://rustup.rs/)
+#### Add and Update a Host
 ```
-git clone https://github.com/An00bRektn/homie.git
-cd homie
-cargo build --release
+PS > homie add -i 10.42.0.69 -n EXAMPLE-DC01 -d examplecorp.local -o windows -a false
+[+] Adding IP Address: 10.42.0.69
+[?] Did you want to create a new directory for this host [10.42.0.69]? (y/n) y
+[*] Making workspace...
+[+] Created! Located at "C:\\Users\\homie\\examplecorp.local\\10.42.0.69"
+PS > cat .\.homie.yml
+hosts:
+  10.42.0.69:
+    hostname: EXAMPLE-DC01
+    os: windows
+    access: false
+    domain: examplecorp.local
+PS > homie update -i 10.42.0.69 -a true                                              
+[*] Updating...
+[+] Updated! New info for 10.42.0.69:
+Host {
+    hostname: "EXAMPLE-DC01",
+    os: "windows",
+    access: true,
+    domain: Some(
+        "examplecorp.local",
+    ),
+}
 ```
-The executable will be located at `target/release/homie`.
+
+#### Delete a Host
+```
+PS > homie.exe delete -i 10.42.0.69        
+[?] Are you sure you want to delete the entry for 10.42.0.69? (y/n) y
+[?] Did you want to delete the directory for 10.42.0.69? (y/n) y
+[*] Deleting workspace...
+[+] Done!
+```
 
 ## FAQ
 ### Couldn't you just do this with a shell script?

@@ -1,7 +1,7 @@
 [package]
 name = "homie"
 repository = "https://github.com/An00bRektn/homie"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "a homie that's really into organization"
 

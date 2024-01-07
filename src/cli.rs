@@ -15,7 +15,7 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Adds a new host to the config file
     Add {
@@ -48,7 +48,7 @@ pub enum Commands {
     },
     /// Initializes a new workspace
     Init {
-        /// (String) specify location for new homie workspace
+        /// (String) specify location for new homie workspace or path to config to rebuild workspace from
         #[arg(short, long, value_name = "FILE")]
         directory: Option<PathBuf>
     },
